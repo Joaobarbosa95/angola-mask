@@ -21,6 +21,7 @@ import VideoScreen from "./VideoScreen";
 // Utils
 import { normalizedToPixelCoordinates } from "./utils/normalized_to_pixel_coordinates";
 import { wearMask } from "./utils/wearMask";
+import { render } from "@testing-library/react";
 
 // Constants
 const DISPLAY_WIDTH = 1920;
@@ -34,6 +35,7 @@ const SWIPE_TIMER = 1000;
 
 const Face = function () {
   const canvasRef = useRef(null);
+  const helperCanvasRef = useRef(null);
 
   const enterArea = useRef(null);
 
@@ -80,21 +82,6 @@ const Face = function () {
     // Set canvas width
     const canvasCtx = canvasRef.current.getContext("2d");
 
-    canvasCtx.save();
-
-    canvasCtx.translate(CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2);
-    canvasCtx.rotate((-90 * Math.PI) / 180);
-    canvasCtx.scale(1, -1);
-    canvasCtx.drawImage(
-      results.image,
-      -CANVAS_HEIGHT / 2,
-      -CANVAS_WIDTH / 2,
-      CANVAS_HEIGHT,
-      CANVAS_WIDTH
-    );
-
-    canvasCtx.restore();
-
     // console.log(results.faceLandmarks)
     // if no face landmarks detected
     // and screen saver is not set
@@ -110,7 +97,7 @@ const Face = function () {
     //   setScreenSaver(false)
     // }
 
-    //canvasCtx.drawImage(results.image, 0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT);
+    canvasCtx.drawImage(results.image, 0, 0, DISPLAY_HEIGHT, DISPLAY_WIDTH);
 
     /**
      * HANDS
@@ -260,11 +247,33 @@ const Face = function () {
         leftEyeCornerPx
       );
 
-      // drawConnectors(canvasCtx, results.faceLandmarks, FACEMESH_CONTOURS, {
-      //   color: "red",
-      //   lineWidth: 3,
-      // });
+      drawConnectors(canvasCtx, results.faceLandmarks, FACEMESH_CONTOURS, {
+        color: "red",
+        lineWidth: 3,
+      });
     }
+  }
+
+  function renderVertically(image) {
+    const helperCanvas = helperCanvasRef.current;
+    const canvasCtx = helperCanvas.getContext("2d");
+
+    canvasCtx.save();
+
+    canvasCtx.translate(CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2);
+    canvasCtx.rotate((-90 * Math.PI) / 180);
+    canvasCtx.scale(1, -1);
+    canvasCtx.drawImage(
+      image,
+      -CANVAS_HEIGHT / 2,
+      -CANVAS_WIDTH / 2,
+      CANVAS_HEIGHT,
+      CANVAS_WIDTH
+    );
+
+    canvasCtx.restore();
+
+    return helperCanvas;
   }
 
   // Init
@@ -290,9 +299,11 @@ const Face = function () {
 
     new Camera(document.getElementsByTagName("video")[0], {
       onFrame: async () => {
-        await holistic.send({
-          image: document.getElementsByTagName("video")[0],
-        });
+        const resultImg = renderVertically(
+          document.getElementsByTagName("video")[0]
+        );
+
+        await holistic.send({ image: resultImg });
       },
       width: DISPLAY_WIDTH,
       height: DISPLAY_HEIGHT,
@@ -304,6 +315,13 @@ const Face = function () {
       <video style={{ display: "none" }} />
 
       {/* {screenSaver && <VideoScreen width={DISPLAY_WIDTH} displayHeight={DISPLAY_HEIGHT}/> } */}
+      <canvas
+        ref={helperCanvasRef}
+        style={{ display: "none" }}
+        className="helper_canvas"
+        width="1080"
+        height="1920"
+      ></canvas>
       <canvas
         ref={canvasRef}
         className="output_canvas"
