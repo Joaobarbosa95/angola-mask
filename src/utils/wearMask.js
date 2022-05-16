@@ -16,10 +16,6 @@ export function wearMask(
     rightEyeCornerPx.x_px - leftEyeCornerPx.x_px
   );
 
-  //  canvasCtx.translate(width / 2, height / 2);
-  //   canvasCtx.rotate((-90 * Math.PI) / 180);
-  //   canvasCtx.scale(1, -1);
-
   canvasCtx.save();
   canvasCtx.translate(x + width / 2, y + height / 2);
   canvasCtx.rotate(roll * 0.9);

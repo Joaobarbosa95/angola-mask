@@ -1,18 +1,11 @@
 import { useRef, useEffect, useState } from "react";
 
-import Webcam from "react-webcam";
-
 import {
   FACEMESH_CONTOURS,
-  FACEMESH_FACE_OVAL,
   Holistic,
 } from "@mediapipe/holistic";
 import {
   drawConnectors,
-  POSE_CONNECTIONS,
-  drawLandmarks,
-  FACEMESH_TESSELATION,
-  HAND_CONNECTIONS,
 } from "@mediapipe/drawing_utils";
 import { Camera } from "@mediapipe/camera_utils";
 
@@ -21,7 +14,6 @@ import VideoScreen from "./VideoScreen";
 // Utils
 import { normalizedToPixelCoordinates } from "./utils/normalized_to_pixel_coordinates";
 import { wearMask } from "./utils/wearMask";
-import { render } from "@testing-library/react";
 
 // Constants
 const DISPLAY_WIDTH = 1920;
@@ -62,41 +54,26 @@ const Face = function () {
     }
   }
 
-  // const [screenSaver, setScreenSaver] = useState(true)
-  // const [timeoutTimer, setTimeoutTimer] = useState(true)
-
-  // useEffect(() => {
-  //   if(!timeoutTimer) return
-
-  //   const timeout = setTimeout(() => {
-  //     setScreenSaver(true)
-  //   }, SCREEN_SAVER_TIMEOUT_TIME)
-
-  //   return () => {
-  //     clearTimeout(timeout)
-  //   }
-  // }, [timeoutTimer])
+  const [screenSaver, setScreenSaver] = useState(false)
+  const timeoutTimer = useRef(false)
 
   // Results
   function onResults(results) {
     // Set canvas width
     const canvasCtx = canvasRef.current.getContext("2d");
 
-    // console.log(results.faceLandmarks)
     // if no face landmarks detected
-    // and screen saver is not set
-    // console.log(results.faceLandmarks?.length)
-    // if(screenSaver && !results.faceLandmarks?.length) {
-    //   return
-    // }
-    // else if (!results.faceLandmarks?.length) {
-    //   setTimeoutTimer(true)
-    //   return
-    // } else {
-    //   setTimeoutTimer(false)
-    //   setScreenSaver(false)
-    // }
-
+    // and screen saver is not set 
+   if(results.faceLandmarks?.length) {
+     clearTimeout(timeoutTimer.current)
+     timeoutTimer.current  = false 
+     setScreenSaver(false)
+    } else if (!timeoutTimer.current) {
+      timeoutTimer.current = setTimeout(() => {
+        setScreenSaver(true)
+      }, SCREEN_SAVER_TIMEOUT_TIME)
+    } 
+    
     canvasCtx.drawImage(results.image, 0, 0, DISPLAY_HEIGHT, DISPLAY_WIDTH);
 
     /**
@@ -218,11 +195,11 @@ const Face = function () {
         return;
 
       // if side face return
-      if (
-        foreheadPx.x_px > rightCheekPx.x_px ||
-        foreheadPx.x_px < leftCheekPx.x_px
-      )
-        return;
+      // if (
+      //   foreheadPx.x_px > rightCheekPx.x_px ||
+      //   foreheadPx.x_px < leftCheekPx.x_px
+      // )
+      //   return;
 
       // face width, height
       // d = √((x2-x1)2 + (y2-y1)2)
@@ -246,6 +223,12 @@ const Face = function () {
         rightEyeCornerPx,
         leftEyeCornerPx
       );
+     
+     
+
+      const picture = canvasRef.current.toDataURL()
+      
+      
 
       drawConnectors(canvasCtx, results.faceLandmarks, FACEMESH_CONTOURS, {
         color: "red",
@@ -314,7 +297,7 @@ const Face = function () {
     <>
       <video style={{ display: "none" }} />
 
-      {/* {screenSaver && <VideoScreen width={DISPLAY_WIDTH} displayHeight={DISPLAY_HEIGHT}/> } */}
+      {screenSaver && <VideoScreen width={DISPLAY_HEIGHT} displayHeight={DISPLAY_WIDTH}/> }
       <canvas
         ref={helperCanvasRef}
         style={{ display: "none" }}
