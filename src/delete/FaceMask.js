@@ -5,11 +5,11 @@ import * as cam from "@mediapipe/camera_utils";
 import Webcam from "react-webcam";
 import { drawConnectors } from "@mediapipe/drawing_utils";
 
-import VideoScreen from "./VideoScreen"
+import VideoScreen from "../VideoScreen"
 
 // Utils
-import {normalizedToPixelCoordinates} from "./utils/normalized_to_pixel_coordinates"
-import {wearMask, mask, draw} from "./utils/wearMask"
+import {normalizedToPixelCoordinates} from "../utils/normalized_to_pixel_coordinates"
+import {wearMask, mask, draw} from "../utils/wearMask"
 
 // Constant
 // const DISPLAY_WIDTH = 1920

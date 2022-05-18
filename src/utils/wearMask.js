@@ -1,12 +1,12 @@
 export function wearMask(
+  canvasCtx,
   imgUrl,
   x,
   y,
   width,
   height,
-  canvasCtx,
   rightEyeCornerPx,
-  leftEyeCornerPx
+  leftEyeCornerPx,
 ) {
   const img = document.createElement("img");
   img.src = imgUrl;
