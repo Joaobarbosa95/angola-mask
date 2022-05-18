@@ -33,7 +33,8 @@ const Dance = function () {
   const canvasRef = useRef(null);
   const helperCanvasRef = useRef(null);
 
-  const [recording, setRecording] = useState(false)
+  const [startCountdown, setStartCountdown] = useState(false)
+  const recordingRef = useRef(false)
   const [videoURL, setVideoURL] = useState(null)
   const [countdown, setCountdown] = useState(COUNTDOWN_TIME)
   const videoRef = useRef(null)
@@ -65,16 +66,17 @@ const Dance = function () {
 
     setVideoURL(null)
     setCountdown(COUNTDOWN_TIME)
-    setRecording(false)
+    setStartCountdown(false)
     videoRef.current = null
   }
 
   useEffect(() => {
-    if(!recording) return
+    if(!startCountdown) return
   
     const timer = setInterval(() => {
       setCountdown(countdown => {
         if(countdown === 1) {
+          recordingRef.current = true
           startVideoRecorder(canvasRef.current, setVideoURL, videoRef)
           clearInterval(timer)      
           return
@@ -88,7 +90,7 @@ const Dance = function () {
       clearInterval(timer)
       setCountdown(COUNTDOWN_TIME)
     }
-  }, [recording])
+  }, [startCountdown])
 
   // Results
   function onResults(results) {
@@ -123,8 +125,8 @@ const Dance = function () {
       // So everytime a person turn their heads
       // The countdown will reset
       // Solution: use Pose landmarks
-      if(!results.faceLandmarks?.length) return setRecording(false)
-      if(!recording) setRecording(true)
+      if(!results.faceLandmarks?.length && !recordingRef.current) return setStartCountdown(false)
+      if(!recordingRef.current) setStartCountdown(true)
     }
   
 
@@ -154,9 +156,11 @@ const Dance = function () {
   useEffect(() => {
     const holistic = new Holistic({
       locateFile: (file) => {
-        return `https://cdn.jsdelivr.net/npm/@mediapipe/holistic/${file}`;
+        return `/holistic/${file}`;
       },
     });
+
+
 
     holistic.setOptions({
       selfieMode: true,
@@ -186,7 +190,7 @@ const Dance = function () {
 
   return (
     <>
-      {recording && countdown && <p style={{position: "absolute", top: "100px", left: "540px", fontSize: "3em"}}>{countdown}</p>}
+      {startCountdown && countdown && <p style={{position: "absolute", top: "100px", left: "540px", fontSize: "3em"}}>{countdown}</p>}
       <video style={{ display: "none" }} />
       {screenSaver && <VideoScreen width={DISPLAY_HEIGHT} displayHeight={DISPLAY_WIDTH}/> }
       <canvas

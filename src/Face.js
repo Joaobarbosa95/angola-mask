@@ -314,7 +314,7 @@ const Face = function () {
   useEffect(() => {
     const holistic = new Holistic({
       locateFile: (file) => {
-        return `https://cdn.jsdelivr.net/npm/@mediapipe/holistic/${file}`;
+        return `./holistic/${file}`;
       },
     });
 
