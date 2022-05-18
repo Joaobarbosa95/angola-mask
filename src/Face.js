@@ -314,7 +314,7 @@ const Face = function () {
   useEffect(() => {
     const holistic = new Holistic({
       locateFile: (file) => {
-        return `./holistic/${file}`;
+        return `/holistic/${file}`;
       },
     });
 

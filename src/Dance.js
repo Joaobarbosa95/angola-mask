@@ -67,6 +67,7 @@ const Dance = function () {
     setVideoURL(null)
     setCountdown(COUNTDOWN_TIME)
     setStartCountdown(false)
+    recordingRef.current = false
     videoRef.current = null
   }
 
