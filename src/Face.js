@@ -349,7 +349,7 @@ const Face = function () {
       {recording && countdown && <p style={{position: "absolute", top: "100px", left: "540px", fontSize: "3em"}}>{countdown}</p>}
       <video style={{ display: "none" }} />
 
-      {screenSaver && <VideoScreen width={DISPLAY_HEIGHT} displayHeight={DISPLAY_WIDTH}/> }
+      {/* {screenSaver && <VideoScreen width={DISPLAY_HEIGHT} displayHeight={DISPLAY_WIDTH}/> } */}
       <canvas
         ref={helperCanvasRef}
         style={{ display: "none" }}

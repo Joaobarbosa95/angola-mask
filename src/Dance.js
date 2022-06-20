@@ -92,51 +92,50 @@ const Dance = function () {
       setCountdown(COUNTDOWN_TIME)
     }
   }, [startCountdown])
-
+  
   // Results
   function onResults(results) {
     // Set canvas width
     const canvasCtx = canvasRef.current.getContext("2d");
-
-    // if no face landmarks detected
-    // and screen saver is not set 
-   if(results.faceLandmarks?.length) {
-     clearTimeout(timeoutTimer.current)
-     timeoutTimer.current  = false 
-     setScreenSaver(false)
-    } else if (!timeoutTimer.current) {
-      timeoutTimer.current = setTimeout(() => {
-        setScreenSaver(true)
-      }, SCREEN_SAVER_TIMEOUT_TIME)
-    } 
-
+    
+    // if(videoRef.current) return results
+    // // if no face landmarks detected
+    // // and screen saver is not set 
+    // if(results.faceLandmarks?.length) {
+    //  clearTimeout(timeoutTimer.current)
+    //  timeoutTimer.current  = false 
+    //  setScreenSaver(false)
+    // } else if (!timeoutTimer.current) {
+    //   timeoutTimer.current = setTimeout(() => {
+    //     setScreenSaver(true)
+    //   }, SCREEN_SAVER_TIMEOUT_TIME)
+    // } 
+    
     canvasCtx.save()
     canvasCtx.clearRect(0,0, DISPLAY_HEIGHT, DISPLAY_WIDTH)
     canvasCtx.drawImage(results.image, 0, 0, DISPLAY_HEIGHT, DISPLAY_WIDTH);      
     canvasCtx.restore()
-
-      drawConnectors(canvasCtx, results.faceLandmarks, FACEMESH_CONTOURS, {
-        color: "red",
-        lineWidth: 3,
-      });
-
-           
-      if(videoRef.current) return
-      // Mediapipe can't render side face landmarks
-      // So everytime a person turn their heads
-      // The countdown will reset
-      // Solution: use Pose landmarks
-      if(!results.faceLandmarks?.length && !recordingRef.current) return setStartCountdown(false)
-      if(!recordingRef.current) setStartCountdown(true)
+    
+    drawConnectors(canvasCtx, results.faceLandmarks, FACEMESH_CONTOURS, {
+      color: "red",
+      lineWidth: 3,
+    });
+    
+    // Mediapipe can't render side face landmarks
+    // So everytime a person turn their heads
+    // The countdown will reset
+    // Solution: use Pose landmarks
+    if(!results.faceLandmarks?.length && !recordingRef.current) return setStartCountdown(false)
+    if(!recordingRef.current) setStartCountdown(true)
     }
   
-
-  function renderVertically(image) {
-    const helperCanvas = helperCanvasRef.current;
-    const canvasCtx = helperCanvas.getContext("2d");
-
+    
+    function renderVertically(image) {
+      const helperCanvas = helperCanvasRef.current;
+      const canvasCtx = helperCanvas.getContext("2d");
+      
     canvasCtx.save();
-
+    
     canvasCtx.translate(CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2);
     canvasCtx.rotate((-90 * Math.PI) / 180);
     canvasCtx.scale(1, -1);
@@ -149,7 +148,7 @@ const Dance = function () {
     );
 
     canvasCtx.restore();
-
+    
     return helperCanvas;
   }
 
@@ -161,11 +160,9 @@ const Dance = function () {
       },
     });
 
-
-
     holistic.setOptions({
       selfieMode: true,
-      modelComplexity: 1,
+      modelComplexity: 0,
       smoothLandmarks: true,
       enableSegmentation: true,
       smoothSegmentation: true,
@@ -215,7 +212,7 @@ const Dance = function () {
 export default Dance;
 
 function startVideoRecorder(canvas, setVideoURL, videoRef) {
-    const videoStream = canvas.captureStream(30);
+    const videoStream = canvas.captureStream(120);
     const mediaRecorder = new MediaRecorder(videoStream);
 
     let chunks = [];
@@ -225,7 +222,7 @@ function startVideoRecorder(canvas, setVideoURL, videoRef) {
 
     mediaRecorder.onstop = async function(e) {
     const blob = new Blob(chunks, { 'type' : 'video/mp4' });
-    chunks = [];
+    chunks = null;
     
     const videoURL = window.URL.createObjectURL(blob);
 
